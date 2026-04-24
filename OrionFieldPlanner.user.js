@@ -8,8 +8,14 @@
 // @grant          none
 // ==/UserScript==
 
-(function () {
+function wrapper(plugin_info) {
     'use strict';
+
+    if (!plugin_info) plugin_info = {};
+    if (!plugin_info.script) plugin_info.script = {};
+
+    plugin_info.pluginId = 'orion-field-planner';
+    plugin_info.script.version = plugin_info.script.version || '0.1.0';
 
     if (typeof window.plugin === 'undefined') {
         window.plugin = function () {};
@@ -18,7 +24,7 @@
     window.plugin.orionFieldPlanner = window.plugin.orionFieldPlanner || {};
     var OFP = window.plugin.orionFieldPlanner;
 
-    OFP.VERSION = '0.1.0';
+    OFP.VERSION = plugin_info.script.version || '0.1.0';
     OFP.DEFAULT_SEED = 'orion-v1';
 
     OFP.state = {
@@ -247,10 +253,26 @@
         OFP.injectButton();
     };
 
+    OFP.setup.info = plugin_info;
+
     window.bootPlugins = window.bootPlugins || [];
     window.bootPlugins.push(OFP.setup);
 
     if (window.iitcLoaded) {
         OFP.setup();
     }
-})();
+}
+
+var script = document.createElement('script');
+var info = {};
+
+if (typeof GM_info !== 'undefined' && GM_info && GM_info.script) {
+    info.script = {
+        version: GM_info.script.version,
+        name: GM_info.script.name,
+        description: GM_info.script.description
+    };
+}
+
+script.appendChild(document.createTextNode('(' + wrapper + ')(' + JSON.stringify(info) + ');'));
+(document.body || document.head || document.documentElement).appendChild(script);
